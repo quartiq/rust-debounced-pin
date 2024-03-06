@@ -18,8 +18,7 @@ repository = "https://github.com/Winseven4lyf/rust-debounced-pin"
 travis-ci = { repository = "Winseven4lyf/rust-debounced-pin" }
 
 [dependencies.embedded-hal]
-version = "0.2.3"
-features = ["unproven"]
+version = "1"
 
 [dev-dependencies.failure]
 version = "0.1.6"

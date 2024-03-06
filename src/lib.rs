@@ -57,7 +57,7 @@
 pub mod prelude;
 
 use core::marker::PhantomData;
-use embedded_hal::digital::v2::InputPin;
+use embedded_hal::digital::{ErrorType, InputPin};
 
 /// Unit struct for active-low pins.
 pub struct ActiveLow;
@@ -150,8 +150,16 @@ impl<T: InputPin> Debounce for DebouncedInputPin<T, ActiveHigh> {
     }
 }
 
+impl<T: InputPin> ErrorType for DebouncedInputPin<T, ActiveLow> {
+    type Error = <T as ErrorType>::Error;
+}
+
+impl<T: InputPin> ErrorType for DebouncedInputPin<T, ActiveHigh> {
+    type Error = <T as ErrorType>::Error;
+}
+
 impl<T: InputPin> Debounce for DebouncedInputPin<T, ActiveLow> {
-    type Error = T::Error;
+    type Error = <T as ErrorType>::Error;
     type State = DebounceState;
 
     /// Updates the debounce logic.
@@ -178,25 +186,21 @@ impl<T: InputPin> Debounce for DebouncedInputPin<T, ActiveLow> {
 }
 
 impl<T: InputPin> InputPin for DebouncedInputPin<T, ActiveHigh> {
-    type Error = T::Error;
-
-    fn is_high(&self) -> Result<bool, Self::Error> {
+    fn is_high(&mut self) -> Result<bool, Self::Error> {
         Ok(self.debounce_state == DebounceState::Active)
     }
 
-    fn is_low(&self) -> Result<bool, Self::Error> {
+    fn is_low(&mut self) -> Result<bool, Self::Error> {
         Ok(self.debounce_state != DebounceState::Active)
     }
 }
 
 impl<T: InputPin> InputPin for DebouncedInputPin<T, ActiveLow> {
-    type Error = T::Error;
-
-    fn is_high(&self) -> Result<bool, Self::Error> {
+    fn is_high(&mut self) -> Result<bool, Self::Error> {
         Ok(self.debounce_state != DebounceState::Active)
     }
 
-    fn is_low(&self) -> Result<bool, Self::Error> {
+    fn is_low(&mut self) -> Result<bool, Self::Error> {
         Ok(self.debounce_state == DebounceState::Active)
     }
 }
